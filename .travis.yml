@@ -1,3 +1,4 @@
+---
 sudo: required
 language: cpp
 
@@ -21,11 +22,23 @@ matrix:
         # Disable encryption tests because exporting GPG key asks for password.
         - COPYQ_TESTS_SKIP_ITEMENCRYPT=1
 
+before_cache:
+  # https://stackoverflow.com/a/53331571/454171
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
+  # Cache only .git files under "/usr/local/Homebrew"
+  # so "brew update" does not take 5min every build
+  - |
+    if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+        find /usr/local/Homebrew \! -regex ".+\.git.+" -delete
+    fi
+
 cache:
-    apt: true
-    ccache: true
-    directories:
+  apt: true
+  ccache: true
+  directories:
     - $HOME/.wheelhouse
+    - $HOME/Library/Caches/Homebrew
+    - /usr/local/Homebrew
 
 # Don't omit tags (default is git --depth=50).
 git:
