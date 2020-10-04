@@ -197,7 +197,7 @@ bool testStderr(const QByteArray &stderrData, TestInterface::ReadStderrFlag flag
     return output.indexOf(scriptExceptionError) == -1;
 }
 
-QByteArray getClipboard(const QString &mime = QString("text/plain"), ClipboardMode mode = ClipboardMode::Clipboard)
+QByteArray getClipboard(const QString &mime = QLatin1String("text/plain"), ClipboardMode mode = ClipboardMode::Clipboard)
 {
     const QMimeData *data = clipboardData(mode);
     return (data != nullptr) ? data->data(mime) : QByteArray();
@@ -253,7 +253,7 @@ public:
 
         m_server.reset(new QProcess);
         if ( !startTestProcess(m_server.get(), QStringList(), QIODevice::NotOpen) ) {
-            return QString("Failed to launch \"%1\": %2")
+            return QString::fromLatin1("Failed to launch \"%1\": %2")
                 .arg(QCoreApplication::applicationFilePath())
                 .arg(m_server->errorString())
                 .toUtf8();
@@ -427,7 +427,7 @@ public:
         }
 
         if (exitCode != expectedExitCode) {
-            return QString("Test failed: Unexpected exit code %1; expected was %2")
+            return QString::fromLatin1("Test failed: Unexpected exit code %1; expected was %2")
                     .arg(exitCode)
                     .arg(expectedExitCode)
                     .toUtf8()
@@ -435,7 +435,7 @@ public:
         }
 
         if ( !stderrActual.contains(stderrContains) ) {
-            return QString("Test failed: Expected error output on client side with \"%1\".")
+            return QString::fromLatin1("Test failed: Expected error output on client side with \"%1\".")
                     .arg(QString::fromUtf8(stderrContains)).toUtf8()
                     + printClienAndServerStderr(stderrActual, exitCode);
         }
@@ -474,7 +474,7 @@ public:
         } while (t.sleep());
 
         const QByteArray actualBytes = getClipboard(mime);
-        return QString("Unexpected clipboard data for MIME \"%1\":")
+        return QString::fromLatin1("Unexpected clipboard data for MIME \"%1\":")
                 .arg(mime).toUtf8()
                 + decorateOutput("Unexpected content", actualBytes)
                 + decorateOutput("Expected content", data)
@@ -520,7 +520,7 @@ public:
         if (stdoutActual == stdoutExpected)
             return QByteArray();
 
-        return QString("Unexpected output for command \"%1\":")
+        return QString::fromLatin1("Unexpected output for command \"%1\":")
                 .arg(arguments.join(' ')).toUtf8()
                 + decorateOutput("Unexpected content", stdoutActual)
                 + decorateOutput("Expected content", stdoutExpected)
@@ -554,7 +554,7 @@ public:
             const auto path = settingsDir.absoluteFilePath(fileName);
             QFile settingsFile(path);
             if ( !settingsFile.remove() ) {
-                return QString("Failed to remove settings file \"%1\": %2")
+                return QString::fromLatin1("Failed to remove settings file \"%1\": %2")
                     .arg(settingsPath, settingsFile.errorString())
                     .toUtf8();
             }
@@ -649,7 +649,7 @@ public:
 
         const int maxRuns = m_env.value("COPYQ_TESTS_RERUN_FAILED", "0").toInt();
         for (int runCounter = 0; exitCode != 0 && !m_failed.isEmpty() && runCounter < maxRuns; ++runCounter) {
-            qInfo() << QString("Rerunning %1 failed tests (%2/%3): %4")
+            qInfo() << QString::fromLatin1("Rerunning %1 failed tests (%2/%3): %4")
                        .arg(m_failed.size())
                        .arg(runCounter + 1)
                        .arg(maxRuns)
@@ -1873,7 +1873,7 @@ void Tests::classDir()
     QVERIFY(tmpDir.isValid());
     QDir dir(tmpDir.path());
     const auto path = dir.path();
-    const auto args = QString("var d = new Dir('%1')").arg(path);
+    const auto args = QString::fromLatin1("var d = new Dir('%1')").arg(path);
 
     RUN(args << "d.exists()", "true\n");
     RUN(args << "d.isReadable()", "true\n");
@@ -1901,8 +1901,8 @@ void Tests::classDir()
     RUN(args << "d.cd('a')" << "d.cd('..')" << "d.path()", path + "\n");
     RUN(args << "d.cd('a')" << "d.cdUp()" << "d.path()", path + "\n");
 
-    RUN(args << "d.count()", QString("%1\n").arg(dir.count()));
-    RUN(args << "d.dirName()", QString("%1\n").arg(dir.dirName()));
+    RUN(args << "d.count()", QString::fromLatin1("%1\n").arg(dir.count()));
+    RUN(args << "d.dirName()", QString::fromLatin1("%1\n").arg(dir.dirName()));
 
     RUN(args << "d.match(['a*'], 'test')", "false\n");
     RUN(args << "d.match(['t*'], 'test')", "true\n");
@@ -2424,7 +2424,7 @@ void Tests::action()
 {
     const Args args = Args("tab") << testTab(1);
     const Args argsAction = Args(args) << "action";
-    const QString action = QString("copyq %1 %2").arg(args.join(" "));
+    const QString action = QString::fromLatin1("copyq %1 %2").arg(args.join(" "));
 
     // action with size
     RUN(argsAction << action.arg("size") << "", "");
@@ -2545,8 +2545,8 @@ void Tests::removeAllFoundItems()
 {
     auto args = Args("add");
     for (int i = 0; i < 50; ++i) {
-        args << QString("a%1").arg(i);
-        args << QString("b%1").arg(i);
+        args << QString::fromLatin1("a%1").arg(i);
+        args << QString::fromLatin1("b%1").arg(i);
     }
 
     RUN(args, "");
@@ -3444,14 +3444,14 @@ void Tests::displayCommand()
     RUN("write" << "0" << testMime << "" << mimeText << "a", "");
     WAIT_ON_OUTPUT(
                 "read(0,1,2)",
-                QString("%1/a\na\n")
+                QString::fromLatin1("%1/a\na\n")
                 .arg(clipboardTabName)
                 .toUtf8() );
 
     RUN("write" << "0" << testMime << "" << mimeText << "b", "");
     WAIT_ON_OUTPUT(
                 "read(0,1,2,3,4)",
-                QString("%1/b\nb\n%1/a\na\n")
+                QString::fromLatin1("%1/b\nb\n%1/a\na\n")
                 .arg(clipboardTabName)
                 .toUtf8() );
 }
